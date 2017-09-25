@@ -1,0 +1,21 @@
+{
+  "name": "sonos-nfc",
+  "version": "0.0.1",
+  "description": "Sonos NFC appliance for my kids",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sonos",
+    "nfc"
+  ],
+  "author": "Thorsten Pohl <thpohl@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "mfrc522-rpi": "^1.0.8",
+    "request": "^2.82.0"
+  }
+}
