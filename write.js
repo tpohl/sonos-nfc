@@ -8,7 +8,7 @@ console.log("scanning...");
 console.log("Please put chip or keycard in the antenna inductive zone!");
 console.log("Press Ctrl-C to stop.");
 
-var payload = { type: 'playlist', value: 'Giraffenaffen' };
+var payload = { value: 'JakobsLieblingslieder' };
 
 setInterval(function () {
 
@@ -17,7 +17,7 @@ setInterval(function () {
     if (!response.status) {
         return;
     }
-    console.log("Card detected, CardType: " + response.bitSize);
+    console.log("Card detected - will write payload, CardType: " + response.bitSize);
 
     //# Get the UID of the card
     response = mfrc522.getUid();
@@ -36,13 +36,17 @@ setInterval(function () {
     //# This is the default key for authentication
     const key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
 
-    var buffer = new Buffer(3 * 16)
-    buffer.fill(' ', 0);;
-    buffer.write(JSON.stringify(payload));
-
+    var payloadString = JSON.stringify(payload);
+    var blocksNeeded = Math.ceil((payloadString.length+1) / 16)
+    console.log('I will need', blocksNeeded, ' Blocks for ', payloadString);
+    var buffer = new Buffer(blocksNeeded * 16)
+    buffer.fill(' ', 0);
+    buffer.write(payloadString);
+    buffer[buffer.length-1]=0x04; // Write End of Transmission Char.
     const trailer = [];
     var i = 0;
-    for (let block = 4; block < 8; block++) {
+    let block = 4;
+    while (i < blocksNeeded) {
         //# Authenticate on Block  with key and uid
         if (mfrc522.authenticate(block, key, uid)) {
             if (block % 4 < 3) {
@@ -59,7 +63,7 @@ setInterval(function () {
             console.log('Auth Error');
             return;
         }
-
+        block++;// NEXT BLOCK please
     }
     mfrc522.stopCrypto();
 

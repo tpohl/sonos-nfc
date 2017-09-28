@@ -8,12 +8,16 @@ var SONOS_API_URL = process.env.SONOS_API_URL;
 var ROOM = process.env.SONOS_ROOM;
 
 function playSonos(itemName, type) {
+    if (!type) type = 'playlist';
     var url = SONOS_API_URL + ROOM + '/' + type + '/' + itemName;
+    console.log('Calling SONOS', url);
+    if (false) {
     request(url, function (error, response, body) {
         console.log('error:', error); // Print the error if one occurred
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
         console.log('body:', body); // Print the HTML for the Google homepage.
     });
+    }
 }
 
 
@@ -54,17 +58,26 @@ setInterval(function () {
     const key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
 
     var buffers = [];
-    for (let i = 4; i < 7; i++) {
+    for (let i = 4; i < 32; i++) {
+     if (i % 4 < 3) {
         if (mfrc522.authenticate(i, key, uid)) {
-            buffers.push(new Buffer(mfrc522.getDataForBlock(i)));
-            console.log("Block: " + i + " Data: ", buffers.length);
+            var buffer = new Buffer(mfrc522.getDataForBlock(i));
+            buffers.push(buffer);
+            console.log("Read Block: ", i );
+            if (buffer[buffer.length-1] === 0x04) {
+                console.log('EOT');
+                buffer.fill(' ',buffer.length-1);//REMOVE EOT
+                break;
+            }
         } else {
             console.log("Authentication Error");
-            //            break;
         }
+      } else {
+         console.log('a trailer block : skipping');
+      }
     }
     mfrc522.stopCrypto();
-    // READ TAG
+    // READ TAG contents
     var totalBuffer = Buffer.concat(buffers);
     var payload = totalBuffer.toString();
     console.log('payload', payload);
@@ -72,8 +85,8 @@ setInterval(function () {
     var object = JSON.parse(payload);
     console.log('Object', object);
 
-    if (object.type && object.value) {
-        playSonos(object.type, object.value);
+    if (object && object.value) {
+        playSonos(object.value, object.type);
     }
 
 }, 500);
