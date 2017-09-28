@@ -1,24 +1,24 @@
 "use strict";
 require('dotenv').config();
-console.log('Hello World');
 
 var request = require('request');
+const mfrc522 = require("mfrc522-rpi");
 
 var SONOS_API_URL = process.env.SONOS_API_URL;
 var ROOM = process.env.SONOS_ROOM;
 
-function playSonos(itemName, type){
-  var url = SONOS_API_URL+ROOM+'/'+type+'/'+itemName;
-  request(url, function (error, response, body) {
-    console.log('error:', error); // Print the error if one occurred
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    console.log('body:', body); // Print the HTML for the Google homepage.
-  });
+function playSonos(itemName, type) {
+    var url = SONOS_API_URL + ROOM + '/' + type + '/' + itemName;
+    request(url, function (error, response, body) {
+        console.log('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+    });
 }
 
 
 
-const mfrc522 = require("mfrc522-rpi");
+
 //# Init Chip
 mfrc522.init();
 
@@ -27,7 +27,7 @@ console.log("scanning...");
 console.log("Please put chip or keycard in the antenna inductive zone!");
 console.log("Press Ctrl-C to stop.");
 
-setInterval(function(){
+setInterval(function () {
 
     //# Scan for cards
     let response = mfrc522.findCard();
@@ -54,25 +54,27 @@ setInterval(function(){
     const key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
 
     var buffers = [];
-for (let i = 4; i < 7; i++) {
+    for (let i = 4; i < 7; i++) {
         if (mfrc522.authenticate(i, key, uid)) {
             buffers.push(new Buffer(mfrc522.getDataForBlock(i)));
-            console.log("Block: "+i+" Data: ", buffers.length);
+            console.log("Block: " + i + " Data: ", buffers.length);
         } else {
             console.log("Authentication Error");
-//            break;
+            //            break;
         }
     }
-
+    mfrc522.stopCrypto();
+    // READ TAG
     var totalBuffer = Buffer.concat(buffers);
     var payload = totalBuffer.toString();
     console.log('payload', payload);
 
-    var object =  JSON.parse(payload);
+    var object = JSON.parse(payload);
     console.log('Object', object);
-    //# Stop
-    mfrc522.stopCrypto();
+
+    if (object.type && object.value) {
+        playSonos(object.type, object.value);
+    }
 
 }, 500);
 
-//playSonos('Giraffenaffen');
