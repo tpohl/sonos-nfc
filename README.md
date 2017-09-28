@@ -4,16 +4,16 @@ Use NFC Tags to play your music on a sonos system.
 
 ## Prerequisites
 
-* a running SONOS-API
-* An mfrc522 NFC Chip wired to
+* a running [SONOS-API](https://github.com/jishi/node-sonos-http-api)
+* A functional [mfrc522 NFC Chip](https://github.com/firsttris/mfrc522-rpi) wired to
 * a Raspberry PI
 
 ## Setup
 
-Set Environment Vars or .env
+Set Environment Vars or `.env`-File
 
-* SONOS_API_URL = Base URL of the Sonos API 
-* SONOS_ROOM = Name of the Room or Player to control
+* `SONOS_API_URL` = Base URL of the Sonos API 
+* `SONOS_ROOM` = Name of the Room or Player to control
 
 ## Run
 
