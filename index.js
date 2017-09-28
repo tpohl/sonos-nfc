@@ -6,17 +6,20 @@ const mfrc522 = require("mfrc522-rpi");
 
 var SONOS_API_URL = process.env.SONOS_API_URL;
 var ROOM = process.env.SONOS_ROOM;
+var SONOS_ENABLED = 'true' != process.env.SONOS_DISABLED;
 
 function playSonos(itemName, type) {
     if (!type) type = 'playlist';
     var url = SONOS_API_URL + ROOM + '/' + type + '/' + itemName;
     console.log('Calling SONOS', url);
-    if (false) {
-    request(url, function (error, response, body) {
+    if (SONOS_ENABLED) {
+      request(url, function (error, response, body) {
         console.log('error:', error); // Print the error if one occurred
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
         console.log('body:', body); // Print the HTML for the Google homepage.
-    });
+      });
+    } else {
+      console.log('Not calling your SONOS');
     }
 }
 
